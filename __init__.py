@@ -25,6 +25,7 @@ Para instalar librerias se debe ingresar por terminal a la carpeta "libs"
 """
 
 import base64
+import unicodedata
 import email
 import imaplib
 import os
@@ -86,6 +87,10 @@ def parse_uid(tmp):
         pass
     match = pattern_uid.match(tmp)
     return match.group('uid')
+
+def remove_accents(input_str):
+    nfkd_form = unicodedata.normalize('NFKD', input_str)
+    return u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
 
 
 if module == "conf_mail":
@@ -157,6 +162,7 @@ if module == "send_mail":
             if filenames:
                 for file in filenames:
                     filename = os.path.basename(file)
+                    filename = remove_accents(filename)
                     attachment = open(file, "rb")
                     part = MIMEBase('application', 'octet-stream')
                     part.set_payload((attachment).read())
@@ -169,6 +175,7 @@ if module == "send_mail":
             if attached_file:
                 if os.path.exists(attached_file):
                     filename = os.path.basename(attached_file)
+                    filename = remove_accents(filename)
                     attachment = open(attached_file, "rb")
                     part = MIMEBase('application', 'octet-stream')
                     part.set_payload((attachment).read())
